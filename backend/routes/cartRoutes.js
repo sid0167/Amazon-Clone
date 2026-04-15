@@ -28,13 +28,19 @@ router.post("/", async (req, res) => {
   }
 
   const index = cart.items.findIndex(
-    i => i.productId === item.productId
+    i => String(i.productId) === String(item.productId)
   );
 
   if (index > -1) {
     cart.items[index].quantity += 1;
   } else {
-    cart.items.push(item);
+    cart.items.push({
+      productId: String(item.productId),
+      name: item.name,
+      image: item.image,
+      price: item.price,
+      quantity: 1
+    });
   }
 
   await cart.save();
