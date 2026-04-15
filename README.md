@@ -287,6 +287,3 @@ amazon-clone/
 │   └── server.js                # Entry point
 │
 └── README.md
-```
-
-
