@@ -10,7 +10,8 @@ export type WishlistItem = {
 
 // ✅ Minimal product type (only what you need)
 type ProductInput = {
-  id: string;
+  id?: string;
+  _id?: string; // ✅ ADD THIS
   name: string;
   images: string[];
   price: number;
@@ -50,7 +51,7 @@ export async function addToWishlist(product: ProductInput): Promise<void> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        productId: product.id,
+        productId: product._id || product.id,
         name: product.name,
         image: product.images[0],
         price: product.price,
