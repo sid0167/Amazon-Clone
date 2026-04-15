@@ -24,12 +24,14 @@ const CartPage = () => {
   }, []);
 
   const handleUpdateQty = async (id, qty) => {
-    await updateCartItem(id, qty);
-  };
+  await updateCartItem(id, qty);
+  await loadCart(); // 🔥 THIS FIXES YOUR ISSUE
+};
 
-  const handleRemove = async (id) => {
-    await deleteCartItem(id);
-  };
+const handleRemove = async (id) => {
+  await deleteCartItem(id);
+  await loadCart();
+};
 
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
   const totalItems = cartItems.reduce((s, i) => s + i.quantity, 0);
