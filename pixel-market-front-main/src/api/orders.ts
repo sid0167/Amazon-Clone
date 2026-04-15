@@ -11,7 +11,7 @@ export async function placeOrder(
 
   // 👇 ADD THIS BLOCK
  const formattedItems = items.map(item => ({
-  productId: item.id,
+  productId: item.productId,
   name: item.name,
   price: item.price,
   quantity: item.quantity ?? 1
