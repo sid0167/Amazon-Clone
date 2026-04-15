@@ -8,22 +8,25 @@ import { useCartStore } from '@/store/cartStore';
 import { placeOrder } from '@/api/orders';
 import type { ShippingAddress, Order } from '@/types';
 import { CheckCircle } from 'lucide-react';
+import type { CartItem } from '@/types';
 
 const indianStates = ['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal','Delhi'];
 
 const steps = ['Address', 'Review', 'Confirm'];
 
 const CheckoutPage = () => {
+  
   const { cartItems, clearCart } = useCartStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [order, setOrder] = useState<Order | null>(null);
+  const [realCart, setRealCart] = useState<CartItem[]>([]);
   const [address, setAddress] = useState<ShippingAddress>({
     fullName: '', phone: '', addressLine1: '', addressLine2: '', city: '', state: '', pinCode: '',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof ShippingAddress, string>>>({});
 
- const subtotal = cartItems.reduce(
+ const subtotal = (realCart.length ? realCart : cartItems).reduce(
   (s, i) => s + i.price * (i.quantity ?? 1),
   0
 );
@@ -43,11 +46,22 @@ const CheckoutPage = () => {
   const handleNextStep = () => {
     if (currentStep === 0 && !validateAddress()) return;
     if (currentStep === 1) {
-      placeOrder(cartItems, address).then((o) => {
-        setOrder(o);
-        clearCart();
-        setCurrentStep(2);
-      });
+      const userId = localStorage.getItem("userId");
+
+fetch(`${import.meta.env.VITE_API_BASE_URL}/cart?userId=${userId}`)
+  .then(res => res.json())
+  .then((items) => {
+  console.log("REAL CART:", items);
+
+  setRealCart(items); // ✅ store it
+
+  return placeOrder(items, address);
+})
+  .then((o) => {
+    setOrder(o);
+    clearCart();
+    setCurrentStep(2);
+  });
       return;
     }
     setCurrentStep((s) => s + 1);
