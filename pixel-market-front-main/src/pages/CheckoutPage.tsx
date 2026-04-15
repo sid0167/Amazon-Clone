@@ -23,7 +23,10 @@ const CheckoutPage = () => {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof ShippingAddress, string>>>({});
 
-  const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
+ const subtotal = cartItems.reduce(
+  (s, i) => s + i.price * (i.quantity ?? 1),
+  0
+);
 
   const validateAddress = () => {
     const e: typeof errors = {};
