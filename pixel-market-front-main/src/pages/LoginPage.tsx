@@ -11,6 +11,36 @@ const LoginPage = () => {
   const [password, setPassword] = useState(""); // ✅ ADD
   const navigate = useNavigate();
 
+  const handleGuestLogin = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: "guest@demo.com",
+        password: "123456"
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error("Guest login failed");
+      return;
+    }
+
+    localStorage.setItem("userId", data.userId);
+    localStorage.setItem("userName", data.name);
+
+    toast.success("Logged in as Guest");
+    navigate("/");
+  } catch (err) {
+    toast.error("Server error");
+  }
+};
+
   const handleLogin = async () => {
     if (!email || !password) {
       toast.error("Please fill all fields");
@@ -77,6 +107,13 @@ const LoginPage = () => {
           >
             Sign In
           </button>
+
+              <button
+  onClick={handleGuestLogin}
+  className="w-full py-2 mt-2 border border-border rounded hover:bg-gray-100"
+>
+  Continue as Guest
+</button>
 
           <p className="text-sm mt-4 text-muted-foreground">
             New to Amazon?{" "}
