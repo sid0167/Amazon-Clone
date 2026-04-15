@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Search, ShoppingCart, MapPin, Heart } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
 interface NavbarProps {
   searchQuery: string;
@@ -15,14 +16,16 @@ const Navbar = ({ searchQuery, onSearchChange }: NavbarProps) => {
   localStorage.getItem("userId");
   const displayName = user ? user.split("@")[0] : "Guest";
   const [category, setCategory] = useState('All');
-  const handleLogout = () => {
+  const navigate = useNavigate();
+
+const handleLogout = () => {
   localStorage.removeItem("userId");
   localStorage.removeItem("userName");
 
-  // optional: clear cart store
+  // clear cart
   useCartStore.getState().clearCart?.();
 
-  window.location.reload();
+  navigate("/"); // 🔥 go to safe page (HOME)
 };
 
   return (
