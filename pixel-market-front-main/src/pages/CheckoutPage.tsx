@@ -56,24 +56,14 @@ const CheckoutPage = () => {
   const handleNextStep = () => {
     if (currentStep === 0 && !validateAddress()) return;
     if (currentStep === 1) {
-      const userId = localStorage.getItem("userId");
-
-fetch(`${import.meta.env.VITE_API_BASE_URL}/cart?userId=${userId}`)
-  .then(res => res.json())
-  .then((items) => {
-  console.log("REAL CART:", items);
-
-  setRealCart(items); // ✅ store it
-
-  return placeOrder(items, address);
-})
-  .then((o) => {
-    setOrder(o);
-    clearCart();
-    setCurrentStep(2);
-  });
-      return;
-    }
+  placeOrder(realCart.length ? realCart : cartItems, address)
+    .then((o) => {
+      setOrder(o);
+      clearCart();
+      setCurrentStep(2);
+    });
+  return;
+}
     setCurrentStep((s) => s + 1);
   };
 
@@ -132,14 +122,14 @@ fetch(`${import.meta.env.VITE_API_BASE_URL}/cart?userId=${userId}`)
           <div className="bg-card rounded-lg border border-border p-6">
             <h2 className="text-xl font-bold text-foreground mb-6">Order Review</h2>
             <div className="space-y-3 mb-6">
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex gap-3 items-center">
+              {(realCart.length ? realCart : cartItems).map((item) => (
+                <div key={item.productId || item.id} className="flex gap-3 items-center">
                   <img src={item.image} alt={item.name} className="w-14 h-14 object-cover rounded" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                   </div>
-                  <p className="font-bold text-foreground">₹{(item.price * item.quantity).toLocaleString()}</p>
+                  <p className="font-bold text-foreground">₹{(item.price * (item.quantity ?? 1)).toLocaleString()}</p>
                 </div>
               ))}
             </div>
