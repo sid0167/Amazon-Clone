@@ -17,29 +17,29 @@ const OrderHistoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const userId = localStorage.getItem("userId");
 
-if (!userId) {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <h2 className="text-lg font-semibold">Please login to view orders</h2>
-    </div>
-  );
-}
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-  const userId = localStorage.getItem("userId");
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
 
+    fetchOrders().then((o) => {
+      setOrders(o);
+      setLoading(false);
+    });
+  }, [userId]); // ✅ dependency added
+
+  // 🔥 AFTER hooks, now safe to return conditionally
   if (!userId) {
-    setLoading(false); // stop loading
-    return; // 🔥 STOP API CALL
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2>Please login to view orders</h2>
+      </div>
+    );
   }
-
-  fetchOrders().then((o) => {
-    setOrders(o);
-    setLoading(false);
-  });
-}, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
