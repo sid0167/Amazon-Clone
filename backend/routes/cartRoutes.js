@@ -58,7 +58,7 @@ router.put("/:productId", async (req, res) => {
   if (!cart) return res.json([]);
 
   const item = cart.items.find(
-    i => String(i.productId) !== String(req.params.productId)
+    i => String(i.productId) === String(req.params.productId)
   );
 
   if (item) {
@@ -78,7 +78,7 @@ router.delete("/:productId", async (req, res) => {
   if (!cart) return res.json([]);
 
   cart.items = cart.items.filter(
-    i => String(i.productId) === String(req.params.productId)
+    i => String(i.productId) !== String(req.params.productId)
   );
 
   await cart.save();
