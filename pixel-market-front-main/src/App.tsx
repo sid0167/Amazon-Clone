@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import WishlistPage from "./pages/WishlistPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -20,12 +21,48 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/product/:id" element={<ProductDetailPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/orders" element={<OrderHistoryPage />} />
-          <Route path="*" element={<NotFound />} />
+         <Route path="/" element={<HomePage />} />
+<Route path="/product/:id" element={<ProductDetailPage />} />
+
+<Route 
+  path="/cart" 
+  element={
+    <ProtectedRoute>
+      <CartPage />
+    </ProtectedRoute>
+  } 
+/>
+
+<Route 
+  path="/checkout" 
+  element={
+    <ProtectedRoute>
+      <CheckoutPage />
+    </ProtectedRoute>
+  } 
+/>
+
+<Route 
+  path="/orders" 
+  element={
+    <ProtectedRoute>
+      <OrderHistoryPage />
+    </ProtectedRoute>
+  } 
+/>
+
+<Route 
+  path="/wishlist" 
+  element={
+    <ProtectedRoute>
+      <WishlistPage />
+    </ProtectedRoute>
+  } 
+/>
+
+<Route path="/login" element={<LoginPage />} />
+<Route path="/signup" element={<SignupPage />} />
+<Route path="*" element={<NotFound />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/login" element={<LoginPage />} />
 <Route path="/signup" element={<SignupPage />} />
