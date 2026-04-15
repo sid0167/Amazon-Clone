@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import SecondaryNav from '@/components/SecondaryNav';
@@ -21,6 +21,16 @@ const CheckoutPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [order, setOrder] = useState<Order | null>(null);
   const [realCart, setRealCart] = useState<CartItem[]>([]);
+  useEffect(() => {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return;
+
+  fetch(`${import.meta.env.VITE_API_BASE_URL}/cart?userId=${userId}`)
+    .then(res => res.json())
+    .then((items) => {
+      setRealCart(items);
+    });
+}, []);
   const [address, setAddress] = useState<ShippingAddress>({
     fullName: '', phone: '', addressLine1: '', addressLine2: '', city: '', state: '', pinCode: '',
   });
