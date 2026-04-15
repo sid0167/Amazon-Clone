@@ -7,18 +7,40 @@ export async function placeOrder(
   items: CartItem[],
   shippingAddress: ShippingAddress
 ): Promise<Order> {
-  const userId = localStorage.getItem("userId"); // ✅
+  const userId = localStorage.getItem("userId");
+
+  // 👇 ADD THIS BLOCK
+  const formattedItems = items.map(item => ({
+    productId: item.id,
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity || 1
+  }));
 
   try {
     const res = await fetch(`${API_BASE}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items, shippingAddress, userId }) // ✅ FIX
+
+      // 👇 CHANGE THIS LINE
+      body: JSON.stringify({
+        userId,
+        items: formattedItems,
+        shippingAddress
+      })
     });
 
-    if (!res.ok) throw new Error('API error');
-    return res.json();
-  } catch {
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("ORDER ERROR:", data); // 🔥 helpful debug
+      throw new Error(data.error || 'API error');
+    }
+
+    return data;
+  } catch (err) {
+    console.error(err);
+
     return {
       id: 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
       items,
@@ -27,18 +49,5 @@ export async function placeOrder(
       status: 'Processing',
       createdAt: new Date().toISOString(),
     };
-  }
-}
-
-// FETCH ORDERS
-export async function fetchOrders(): Promise<Order[]> {
-  const userId = localStorage.getItem("userId"); // ✅
-
-  try {
-    const res = await fetch(`${API_BASE}/orders?userId=${userId}`); // ✅ FIX
-    if (!res.ok) throw new Error('API error');
-    return res.json();
-  } catch {
-    return [];
   }
 }
