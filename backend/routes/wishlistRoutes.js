@@ -3,54 +3,63 @@ import Wishlist from "../models/Wishlist.js";
 
 const router = express.Router();
 
-// GET wishlist
+// ✅ GET wishlist
 router.get("/", async (req, res) => {
-  let wishlist = await Wishlist.findOne({ userId: "user_default_1" });
+  const userId = req.query.userId;
+
+  let wishlist = await Wishlist.findOne({ userId });
 
   if (!wishlist) {
-    wishlist = await Wishlist.create({ items: [] });
+    wishlist = await Wishlist.create({ userId, items: [] });
   }
 
-  res.json(wishlist);
+  res.json(wishlist.items); // ✅ return only items
 });
 
-// ADD to wishlist
-router.post("/add", async (req, res) => {
-  const { product } = req.body;
+// ✅ ADD to wishlist
+router.post("/", async (req, res) => {
+  const userId = req.query.userId;
+  const item = req.body;
 
-  let wishlist = await Wishlist.findOne({ userId: "user_default_1" });
+  let wishlist = await Wishlist.findOne({ userId });
 
   if (!wishlist) {
-    wishlist = await Wishlist.create({ items: [] });
+    wishlist = await Wishlist.create({ userId, items: [] });
   }
 
   const exists = wishlist.items.find(
-    item => item.productId === product._id
+    i => String(i.productId) === String(item.productId)
   );
 
   if (!exists) {
     wishlist.items.push({
-      productId: product._id,
-      name: product.name,
-      image: product.images[0],
-      price: product.price
+      productId: String(item.productId),
+      name: item.name,
+      image: item.image,
+      price: item.price
     });
   }
 
   await wishlist.save();
-  res.json(wishlist);
+
+  res.json(wishlist.items);
 });
 
-// REMOVE
+// ✅ REMOVE
 router.delete("/:productId", async (req, res) => {
-  const wishlist = await Wishlist.findOne({ userId: "user_default_1" });
+  const userId = req.query.userId;
+
+  let wishlist = await Wishlist.findOne({ userId });
+
+  if (!wishlist) return res.json([]);
 
   wishlist.items = wishlist.items.filter(
-    item => item.productId !== req.params.productId
+    i => String(i.productId) !== String(req.params.productId)
   );
 
   await wishlist.save();
-  res.json(wishlist);
+
+  res.json(wishlist.items);
 });
 
 export default router;

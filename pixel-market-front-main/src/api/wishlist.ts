@@ -1,82 +1,87 @@
-import type { Product } from '@/types';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ;
-
-// Mock wishlist
-let mockWishlist: Product[] = [];
-
-type WishlistItem = {
+// ✅ Matches backend
+export type WishlistItem = {
   productId: string;
   name: string;
   image: string;
   price: number;
 };
 
-// GET Wishlist
-export async function fetchWishlist(): Promise<Product[]> {
-  const userId = localStorage.getItem("userId"); // ✅ moved here
+// ✅ Minimal product type (only what you need)
+type ProductInput = {
+  id: string;
+  name: string;
+  images: string[];
+  price: number;
+};
+
+// ✅ GET Wishlist
+export async function fetchWishlist(): Promise<WishlistItem[]> {
+  const userId = localStorage.getItem("userId");
 
   try {
     const res = await fetch(`${API_BASE}/wishlist?userId=${userId}`);
-    if (!res.ok) throw new Error('API error');
+
+    if (!res.ok) throw new Error("Failed to fetch wishlist");
 
     const data = await res.json();
 
-    return (data.items || []).map((item: WishlistItem) => ({
-      id: item.productId,
-      name: item.name,
-      description: "",
-      price: item.price,
-      originalPrice: undefined,
-      images: [item.image],
-      category: "",
-      stock: 0,
-      rating: 0,
-      reviewCount: 0,
-      specifications: [],
-      isPrime: false
-    }));
-
-  } catch {
-    return mockWishlist;
+    return Array.isArray(data) ? data : []; // ✅ safe
+  } catch (err) {
+    console.error("Fetch wishlist error:", err);
+    return [];
   }
 }
 
-// ADD to Wishlist
-export async function addToWishlist(product: Product): Promise<Product[]> {
-  const userId = localStorage.getItem("userId"); // ✅
+// ✅ ADD to Wishlist
+export async function addToWishlist(product: ProductInput): Promise<void> {
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first");
+    return;
+  }
 
   try {
-    const res = await fetch(`${API_BASE}/wishlist/add`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product, userId }) // ✅ IMPORTANT
+    const res = await fetch(`${API_BASE}/wishlist?userId=${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productId: product.id,
+        name: product.name,
+        image: product.images[0],
+        price: product.price,
+      }),
     });
 
-    if (!res.ok) throw new Error('API error');
+    if (!res.ok) throw new Error("Failed to add item");
 
-    return fetchWishlist(); // ✅ refresh properly
-  } catch {
-    const exists = mockWishlist.find(p => p.id === product.id);
-    if (!exists) {
-      mockWishlist.push(product);
-    }
-    return mockWishlist;
+    // 🔥 notify app
+    window.dispatchEvent(new Event("wishlistUpdated"));
+  } catch (err) {
+    console.error("Add to wishlist error:", err);
   }
 }
 
-// REMOVE from Wishlist
-export async function removeFromWishlist(productId: string): Promise<Product[]> {
-  const userId = localStorage.getItem("userId"); // ✅
+// ✅ REMOVE from Wishlist
+export async function removeFromWishlist(productId: string): Promise<void> {
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) return;
 
   try {
-    await fetch(`${API_BASE}/wishlist/${productId}?userId=${userId}`, {
-      method: 'DELETE'
+    const res = await fetch(`${API_BASE}/wishlist/${productId}?userId=${userId}`, {
+      method: "DELETE",
     });
 
-    return fetchWishlist(); // ✅ refresh
-  } catch {
-    mockWishlist = mockWishlist.filter(p => p.id !== productId);
-    return mockWishlist;
+    if (!res.ok) throw new Error("Failed to remove item");
+
+    // 🔥 notify app
+    window.dispatchEvent(new Event("wishlistUpdated"));
+  } catch (err) {
+    console.error("Remove wishlist error:", err);
   }
 }

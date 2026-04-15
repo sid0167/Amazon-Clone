@@ -4,26 +4,60 @@ import Navbar from "@/components/Navbar";
 import SecondaryNav from "@/components/SecondaryNav";
 import Footer from "@/components/Footer";
 import { fetchWishlist, removeFromWishlist } from "@/api/wishlist";
-import type { Product } from "@/types";
 import { toast } from "sonner";
 
+// ✅ Correct type (matches backend)
+type WishlistItem = {
+  productId: string;
+  name: string;
+  image: string;
+  price: number;
+};
+
 const WishlistPage = () => {
-  const [items, setItems] = useState<Product[]>([]);
+  const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    setLoading(true);
-    fetchWishlist().then((data) => {
-      setItems(data);
+  // ✅ Load wishlist
+  const loadWishlist = async () => {
+    try {
+      const data = await fetchWishlist();
+      setItems(data || []);
+    } catch (err) {
+      console.error("Wishlist fetch error:", err);
+      setItems([]);
+    } finally {
       setLoading(false);
-    });
+    }
+  };
+
+  useEffect(() => {
+    loadWishlist();
+
+    // ✅ Listen for updates (optional but useful)
+    const handler = () => loadWishlist();
+
+    window.addEventListener("wishlistUpdated", handler);
+
+    return () => {
+      window.removeEventListener("wishlistUpdated", handler);
+    };
   }, []);
 
+  // ✅ Remove item
   const handleRemove = async (id: string) => {
-    const updated = await removeFromWishlist(id);
-    setItems(updated);
-    toast.success("Removed from wishlist");
+    try {
+      await removeFromWishlist(id);
+
+      // 🔥 instant UI update (no flicker)
+      setItems((prev) => prev.filter((i) => i.productId !== id));
+
+      toast.success("Removed from wishlist");
+    } catch (err) {
+      console.error("Remove error:", err);
+      toast.error("Failed to remove item");
+    }
   };
 
   return (
@@ -49,12 +83,12 @@ const WishlistPage = () => {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {items.map((item) => (
               <div
-                key={item.id}
+                key={item.productId}
                 className="bg-card border border-border rounded-lg p-4 shadow hover:shadow-lg transition"
               >
-                <Link to={`/product/${item.id}`}>
+                <Link to={`/product/${item.productId}`}>
                   <img
-                    src={item.images[0]}
+                    src={item.image}
                     alt={item.name}
                     className="w-full h-48 object-cover rounded mb-3"
                   />
@@ -68,7 +102,7 @@ const WishlistPage = () => {
                 </p>
 
                 <button
-                  onClick={() => handleRemove(item.id)}
+                  onClick={() => handleRemove(item.productId)}
                   className="w-full text-red-500 border border-red-500 py-2 rounded hover:bg-red-50 transition"
                 >
                   Remove
