@@ -3,26 +3,36 @@ import Navbar from '@/components/Navbar';
 import SecondaryNav from '@/components/SecondaryNav';
 import Footer from '@/components/Footer';
 import CartItemComponent from '@/components/CartItem';
-import { useCartStore } from '@/store/cartStore';
-import { updateCartItem, deleteCartItem } from '@/api/cart';
+import { getCart, updateCartItem, deleteCartItem } from '@/api/cart';
 import { ShoppingCart } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const CartPage = () => {
-  const { cartItems, updateQuantity, removeFromCart } = useCartStore();
+  const [cartItems, setCartItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const loadCart = async () => {
+    const data = await getCart();
+    setCartItems(data);
+  };
+
+  useEffect(() => {
+    loadCart();
+
+    window.addEventListener("cartUpdated", loadCart);
+    return () => window.removeEventListener("cartUpdated", loadCart);
+  }, []);
+
+  const handleUpdateQty = async (id, qty) => {
+    await updateCartItem(id, qty);
+  };
+
+  const handleRemove = async (id) => {
+    await deleteCartItem(id);
+  };
+
   const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
   const totalItems = cartItems.reduce((s, i) => s + i.quantity, 0);
-
-  const handleUpdateQty = (id: string, qty: number) => {
-    updateQuantity(id, qty);
-    updateCartItem(id, qty);
-  };
-
-  const handleRemove = (id: string) => {
-    removeFromCart(id);
-    deleteCartItem(id);
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -36,7 +46,9 @@ const CartPage = () => {
           <div className="text-center py-20">
             <ShoppingCart size={80} className="mx-auto text-muted-foreground mb-4" />
             <h2 className="text-xl font-bold text-foreground mb-2">Your Amazon Cart is empty</h2>
-            <p className="text-muted-foreground mb-6">Your shopping cart is waiting. Give it purpose — fill it with groceries, clothing, household supplies, electronics and more.</p>
+            <p className="text-muted-foreground mb-6">
+              Your shopping cart is waiting. Fill it with items!
+            </p>
             <Link to="/" className="btn-amazon px-8 py-3">Shop now</Link>
           </div>
         ) : (
@@ -44,21 +56,26 @@ const CartPage = () => {
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
                 <CartItemComponent
-                  key={item.id}
+                  key={item.productId} // ✅ FIX
                   item={item}
                   onUpdateQuantity={handleUpdateQty}
                   onRemove={handleRemove}
                 />
               ))}
             </div>
+
             <div className="lg:col-span-1">
               <div className="bg-card rounded-lg border border-border p-6 sticky top-20">
                 {subtotal >= 499 && (
-                  <p className="text-sm text-green-600 mb-3">✓ Your order qualifies for FREE Delivery</p>
+                  <p className="text-sm text-green-600 mb-3">
+                    ✓ Your order qualifies for FREE Delivery
+                  </p>
                 )}
                 <p className="text-lg text-foreground">
-                  Subtotal ({totalItems} items): <span className="font-bold">₹{subtotal.toLocaleString()}</span>
+                  Subtotal ({totalItems} items):
+                  <span className="font-bold"> ₹{subtotal.toLocaleString()}</span>
                 </p>
+
                 <Link to="/checkout" className="btn-amazon w-full py-3 mt-4 block text-center">
                   Proceed to Buy
                 </Link>
