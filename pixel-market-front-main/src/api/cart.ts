@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const API_BASE = "https://amazon-clone-u3xt.onrender.com/api";
 
 // 🔁 UPDATE ITEM
 export async function updateCartItem(itemId, quantity) {
