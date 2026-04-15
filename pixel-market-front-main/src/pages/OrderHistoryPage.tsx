@@ -17,13 +17,29 @@ const OrderHistoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const userId = localStorage.getItem("userId");
+
+if (!userId) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <h2 className="text-lg font-semibold">Please login to view orders</h2>
+    </div>
+  );
+}
 
   useEffect(() => {
-    fetchOrders().then((o) => {
-      setOrders(o);
-      setLoading(false);
-    });
-  }, []);
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    setLoading(false); // stop loading
+    return; // 🔥 STOP API CALL
+  }
+
+  fetchOrders().then((o) => {
+    setOrders(o);
+    setLoading(false);
+  });
+}, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
