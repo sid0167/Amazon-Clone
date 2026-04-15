@@ -17,6 +17,8 @@ export async function placeOrder(
   quantity: item.quantity ?? 1
 }));
 
+
+
   try {
     const res = await fetch(`${API_BASE}/orders`, {
       method: 'POST',
@@ -50,4 +52,18 @@ export async function placeOrder(
       createdAt: new Date().toISOString(),
     };
   }
+}
+
+export async function fetchOrders(): Promise<Order[]> {
+  const userId = localStorage.getItem("userId");
+
+  const res = await fetch(`${API_BASE}/orders?userId=${userId}`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    console.error("FETCH ORDERS ERROR:", data);
+    throw new Error(data.error || "Failed to fetch orders");
+  }
+
+  return data;
 }
