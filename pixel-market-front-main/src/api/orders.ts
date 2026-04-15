@@ -1,6 +1,6 @@
 import type { CartItem, ShippingAddress, Order } from '@/types';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL ;
 
 // PLACE ORDER
 export async function placeOrder(
