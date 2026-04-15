@@ -3,9 +3,9 @@ import Cart from "../models/Cart.js";
 
 const router = express.Router();
 
-// GET cart
+// ✅ GET CART
 router.get("/", async (req, res) => {
-  const userId = req.query.userId || "guest";
+  const userId = req.query.userId;
 
   let cart = await Cart.findOne({ userId });
 
@@ -13,12 +13,13 @@ router.get("/", async (req, res) => {
     cart = await Cart.create({ userId, items: [] });
   }
 
-  res.json(cart);
+  res.json(cart.items); // 🔥 FIXED (important)
 });
 
-// ADD to cart
-router.post("/add", async (req, res) => {
-  const { product, userId } = req.body;
+// ✅ ADD TO CART (MATCH FRONTEND)
+router.post("/", async (req, res) => {
+  const userId = req.query.userId;
+  const item = req.body;
 
   let cart = await Cart.findOne({ userId });
 
@@ -26,38 +27,32 @@ router.post("/add", async (req, res) => {
     cart = await Cart.create({ userId, items: [] });
   }
 
-  const itemIndex = cart.items.findIndex(
-    item => item.productId === product.id
+  const index = cart.items.findIndex(
+    i => i.productId === item.productId
   );
 
-  if (itemIndex > -1) {
-    cart.items[itemIndex].quantity += 1;
+  if (index > -1) {
+    cart.items[index].quantity += 1;
   } else {
-    cart.items.push({
-      productId: product._id,
-      name: product.name,
-      image: product.images[0],
-      price: product.price,
-      quantity: 1
-    });
+    cart.items.push(item);
   }
 
   await cart.save();
-  res.json(cart);
+
+  res.json(cart.items);
 });
 
-// UPDATE quantity
+// ✅ UPDATE
 router.put("/:productId", async (req, res) => {
-  const { quantity, userId } = req.body;
+  const userId = req.query.userId;
+  const { quantity } = req.body;
 
   let cart = await Cart.findOne({ userId });
 
-  if (!cart) {
-    cart = await Cart.create({ userId, items: [] });
-  }
+  if (!cart) return res.json([]);
 
   const item = cart.items.find(
-    item => item.productId === req.params.productId
+    i => i.productId === req.params.productId
   );
 
   if (item) {
@@ -65,25 +60,23 @@ router.put("/:productId", async (req, res) => {
   }
 
   await cart.save();
-  res.json(cart);
+  res.json(cart.items);
 });
 
-// DELETE item
+// ✅ DELETE
 router.delete("/:productId", async (req, res) => {
   const userId = req.query.userId;
 
   let cart = await Cart.findOne({ userId });
 
-  if (!cart) {
-    return res.json({ items: [] }); // safe return
-  }
+  if (!cart) return res.json([]);
 
   cart.items = cart.items.filter(
-    item => item.productId !== req.params.productId
+    i => i.productId !== req.params.productId
   );
 
   await cart.save();
-  res.json(cart);
+  res.json(cart.items);
 });
 
 export default router;
