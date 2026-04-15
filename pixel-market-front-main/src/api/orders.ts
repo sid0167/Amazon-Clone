@@ -10,12 +10,12 @@ export async function placeOrder(
   const userId = localStorage.getItem("userId");
 
   // 👇 ADD THIS BLOCK
-  const formattedItems = items.map(item => ({
-    productId: item.id,
-    name: item.name,
-    price: item.price,
-    quantity: item.quantity || 1
-  }));
+ const formattedItems = items.map(item => ({
+  productId: item.id,
+  name: item.name,
+  price: item.price,
+  quantity: item.quantity ?? 1
+}));
 
   try {
     const res = await fetch(`${API_BASE}/orders`, {
