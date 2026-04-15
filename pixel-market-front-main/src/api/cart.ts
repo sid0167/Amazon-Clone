@@ -23,3 +23,37 @@ export async function deleteCartItem(itemId) {
     method: 'DELETE'
   });
 }
+
+export async function getCart() {
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) return [];
+
+  const res = await fetch(`${API_BASE}/cart?userId=${userId}`);
+  const data = await res.json();
+
+  return data;
+}
+
+export async function addToCart(product) {
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first");
+    return;
+  }
+
+  await fetch(`${API_BASE}/cart?userId=${userId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      productId: product.id,
+      name: product.name,
+      image: product.images[0],
+      price: product.price,
+      quantity: 1,
+    }),
+  });
+}

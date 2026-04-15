@@ -7,25 +7,22 @@ import { addToWishlist, removeFromWishlist } from "@/api/wishlist";
 import { ShieldCheck } from 'lucide-react';
 import { useState } from "react";
 import { Heart } from "lucide-react";
+import { addToCart } from "@/api/cart";
 
 const ProductCard = ({ product }: { product: Product }) => {
-  const addToCart = useCartStore((s) => s.addToCart);
+  
   const [liked, setLiked] = useState(false);
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    addToCart({
-      productId: product.id,
-      name: product.name,
-      image: product.images[0],
-      price: product.price,
-      quantity: 1,
-    });
-    toast.success('Added to cart ✓');
-  };
+ const handleAddToCart = async (e: React.MouseEvent) => {
+  e.preventDefault();
+
+  await addToCart(product); // 🔥 backend call
+
+  toast.success("Added to cart ✓");
+};
 
   return (
     <Link to={`/product/${product.id}`} className="block">
