@@ -21,6 +21,15 @@ router.post("/", async (req, res) => {
   const userId = req.query.userId;
   const item = req.body;
 
+  // 🔥 CRITICAL VALIDATION
+  if (!userId) {
+    return res.status(400).json({ error: "UserId missing" });
+  }
+
+  if (!item.productId) {
+    return res.status(400).json({ error: "ProductId missing" });
+  }
+
   let wishlist = await Wishlist.findOne({ userId });
 
   if (!wishlist) {
