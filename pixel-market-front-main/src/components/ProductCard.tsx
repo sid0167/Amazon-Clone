@@ -55,7 +55,15 @@ const handleAddToCart = async (e: React.MouseEvent) => {
           <img src={product.images[0]} alt={product.name} className="object-cover w-full h-full" loading="lazy" />
         </div>
         <h3 className="text-sm font-medium line-clamp-2 mb-1 text-foreground">{product.name}</h3>
-        <StarRating rating={product.rating} reviewCount={product.reviewCount} size={14} />
+        <StarRating
+  rating={product.rating}
+  reviewCount={product.reviewCount}
+  size={14}
+  onRate={(value) => {
+    toast.success(`Rated ${value} ⭐`);
+    console.log("Rated:", product.id, value);
+  }}
+/>
         <div className="mt-1">
           <span className="text-lg font-bold text-foreground">₹{product.price.toLocaleString()}</span>
           {product.originalPrice && (
