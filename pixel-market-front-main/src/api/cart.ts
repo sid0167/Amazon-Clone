@@ -74,7 +74,7 @@ export async function addToCart(product) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        productId: product.id,
+        productId: product._id,
         name: product.name,
         image: product.images[0],
         price: product.price,
