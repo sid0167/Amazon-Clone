@@ -16,8 +16,8 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }: CartItemProps) => {
         <h3 className="font-medium text-foreground truncate">{item.name}</h3>
         <p className="text-lg font-bold text-foreground mt-1">₹{item.price.toLocaleString()}</p>
         <div className="flex items-center gap-4 mt-2">
-          <QuantityStepper quantity={item.quantity} onChange={(qty) => onUpdateQuantity(item.id, qty)} />
-          <button onClick={() => onRemove(item.id)} className="text-destructive text-sm flex items-center gap-1 hover:underline">
+          <QuantityStepper quantity={item.quantity} onChange={(qty) => onUpdateQuantity(item.productId, qty)} />
+          <button onClick={() => onRemove(item.productId)} className="text-destructive text-sm flex items-center gap-1 hover:underline">
             <Trash2 size={14} /> Delete
           </button>
         </div>
