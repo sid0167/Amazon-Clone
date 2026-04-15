@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Search, ShoppingCart, MapPin, Heart } from 'lucide-react';
-import { useCartStore } from '@/store/cartStore';
+
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { getCart } from "@/api/cart";
 
 interface NavbarProps {
   searchQuery: string;
@@ -10,7 +12,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ searchQuery, onSearchChange }: NavbarProps) => {
-  const cartCount = useCartStore((s) => s.cartCount);
+const [cartCount, setCartCount] = useState(0);
  const user =
   localStorage.getItem("userName") ||
   localStorage.getItem("userId");
@@ -18,12 +20,27 @@ const Navbar = ({ searchQuery, onSearchChange }: NavbarProps) => {
   const [category, setCategory] = useState('All');
   const navigate = useNavigate();
 
+  useEffect(() => {
+  const loadCart = async () => {
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) {
+      setCartCount(0); // 🔥 important after logout
+      return;
+    }
+
+    const data = await getCart();
+    setCartCount(data.length);
+  };
+
+  loadCart();
+}, [user]); // 🔥 runs when login/logout changes
 const handleLogout = () => {
   localStorage.removeItem("userId");
   localStorage.removeItem("userName");
 
   // clear cart
-  useCartStore.getState().clearCart?.();
+  
 
   navigate("/"); // 🔥 go to safe page (HOME)
 };
