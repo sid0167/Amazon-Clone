@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import StarRating from './StarRating';
-import { useCartStore } from '@/store/cartStore';
+
 import { toast } from 'sonner';
 import type { Product } from '@/types';
 import { addToWishlist, removeFromWishlist } from "@/api/wishlist";
@@ -16,10 +16,13 @@ const ProductCard = ({ product }: { product: Product }) => {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
- const handleAddToCart = async (e: React.MouseEvent) => {
+const handleAddToCart = async (e: React.MouseEvent) => {
   e.preventDefault();
 
-  await addToCart(product); // 🔥 backend call
+  await addToCart(product);
+
+  // 🔥 ADD THIS LINE (VERY IMPORTANT)
+  window.dispatchEvent(new Event("cartUpdated"));
 
   toast.success("Added to cart ✓");
 };

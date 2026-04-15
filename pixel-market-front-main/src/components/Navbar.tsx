@@ -20,12 +20,12 @@ const [cartCount, setCartCount] = useState(0);
   const [category, setCategory] = useState('All');
   const navigate = useNavigate();
 
-  useEffect(() => {
+useEffect(() => {
   const loadCart = async () => {
     const userId = localStorage.getItem("userId");
 
     if (!userId) {
-      setCartCount(0); // 🔥 important after logout
+      setCartCount(0);
       return;
     }
 
@@ -34,15 +34,25 @@ const [cartCount, setCartCount] = useState(0);
   };
 
   loadCart();
-}, [user]); // 🔥 runs when login/logout changes
+
+  // 🔥 FIX: stable handler
+  const handler = () => {
+    loadCart();
+  };
+
+  window.addEventListener("cartUpdated", handler);
+
+  return () => {
+    window.removeEventListener("cartUpdated", handler);
+  };
+}, []);// 🔥 runs when login/logout changes
 const handleLogout = () => {
   localStorage.removeItem("userId");
   localStorage.removeItem("userName");
 
-  // clear cart
-  
+  setCartCount(0); // 🔥 immediate reset
 
-  navigate("/"); // 🔥 go to safe page (HOME)
+  navigate("/");
 };
 
   return (
